@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <title>Document</title>
+    <style>
+        #cardcontainer {
+            display: flex;
+            flex-wrap: wrap;
+            /* gap: 20px; */
+            /* Adjust the gap between cards */
+        }
+
+        .card {
+            flex: 1 0 calc(33.33% - 20px);
+            /* Flex properties to control sizing */
+            height: 100%;
+            /* Ensuring the card stretches vertically */
+            margin-bottom: 20px;
+            /* Space between rows */
+        }
+
+
+        .card-img-top {
+            width: 100%;
+            /* Ensuring the image fills the card width */
+            object-fit: cover;
+            /* Controlling how the image fills the space */
+            flex-shrink: 0;
+            /* Preventing the image from shrinking */
+            height: 300px;
+            /* Fixed height for images (adjust as needed) */
+        }
+
+
+        .card-body {
+            flex: 1;
+            /* Allowing the card body to grow vertically */
+        }
+    </style>
+</head>
+
+<body>
+
+
+    <div class="container">
+        <div style="display:flex ;gap:50px;align-items: center; flex-direction: row">
+            <h1> clothes</h1>
+            <div>
+                <input id="searchInput" class="row" type='search' placeholder=" serach here" />
+            </div>
+        </div>
+        <div id="cardcontainer" class="row"></div>
+    </div>
+
+
+
+
+    <script>
+
+        document.addEventListener("DOMContentLoaded", async (e) => {
+            const searchInput = document.getElementById("searchInput");
+            let results = [];
+
+            async function fetchAllData() {
+                try {
+                    const response = await fetch("http://localhost:8001/getclothdata");
+                    if (!response.ok) {
+                        console.log("an error fetching data");
+                    }
+                    results = await response.json();
+                    console.log(results);
+                    displayResults(results);
+                } catch (error) {
+                    console.error("error fetching data", error);
+                }
+            }
+
+            function displayResults(results) {
+                const cardContainer = document.getElementById('cardcontainer');
+                if (cardContainer) {
+                    cardContainer.innerHTML = "";
+                    results.forEach(result => {
+                        const card = document.createElement("div");
+                        card.className = "col-4 mb-3";
+                        card.innerHTML = `<div class = "card">
+                    <img id ="img" src ="${result.image_url}" class = "card-img-top" alt = "${result.name}">
+                    <div class ="card-body">
+                        <h6 class ="card-title">name:${result.cloth_name}</h6>
+                        <p class ="card-text">size:${result.size}</p>
+                        <p class ="card-text">price:${result.price}</p>
+                        </div>
+                        </div>`;
+                        cardContainer.appendChild(card);
+                    });
+
+                }
+            }
+
+            function filterResults(query) {
+                const filteredResults = results.filter(result =>
+                    result.cloth_name.toLowerCase().includes(query.toLowerCase()));
+                displayResults(filteredResults);
+            }
+
+            searchInput.addEventListener("input", async (e) => {
+                const query = e.target.value.trim();
+                if (query.length > 3) {
+                    filterResults(query);
+                } else {
+                    displayResults(results);
+                }
+
+
+
+            })
+            await fetchAllData();
+        });
+
+
+    </script>
+
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+
+
+</body>
+
+</html>
